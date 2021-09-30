@@ -8,7 +8,7 @@
 
 import Foundation
 
-protocol CalculatorDelegate {
+protocol CalculatorDelegate: AnyObject {
     func displayAlert(message: String)
     func didReceiveData(data: String)
 }
@@ -16,7 +16,7 @@ protocol CalculatorDelegate {
 class Calculator {
 
     // Properties:
-    var delegate: CalculatorDelegate?
+    weak var delegate: CalculatorDelegate?
     var textView = ""
     var result: Double = 0.00
     var elements: [String] {
@@ -24,12 +24,12 @@ class Calculator {
     }
 
     // Functions:
-    func sendToControler(data: String) {
+    func update(data: String) {
         delegate?.didReceiveData(data: data)
     }
 
     private func expressionIsCorrect(elements: [String]) -> Bool {
-        return elements.last != "+" && elements.last != "-"
+        return elements.last != "+" && elements.last != "-" && elements.last != "x" && elements.last != "÷"
     }
 
     private func expressionHaveEnoughElement(elements: [String]) -> Bool {
@@ -37,7 +37,7 @@ class Calculator {
     }
 
     private func canAddOperator(elements: [String]) -> Bool {
-        return elements.last != "+" && elements.last != "-" && elements.last != "x" && elements.last != "÷"
+        return expressionIsCorrect(elements: elements)
     }
 
     func expressionHaveResult(elements: String) -> Bool {
@@ -45,43 +45,32 @@ class Calculator {
     }
 
     func tappedAddition() {
-        if canAddOperator(elements: elements) {
-            textView += " + "
-        } else {
-            delegate?.displayAlert(message: "operand already exist")
-        }
-        return sendToControler(data: "+")
+        addOperator(text: "+")
     }
 
     func tappedSubstraction() {
-        if canAddOperator(elements: elements) {
-            textView += " - "
-        } else {
-            delegate?.displayAlert(message: "error: operand already exist")
-        }
-        return sendToControler(data: "-")
+        addOperator(text: "-")
     }
 
     func tappedMultiplication() {
-        if canAddOperator(elements: elements) {
-            textView += " x "
-        } else {
-            delegate?.displayAlert(message: "error: operand already exist")
-        }
-        return sendToControler(data: "x")
+        addOperator(text: "x")
     }
 
     func tappedDivision() {
+        addOperator(text: "÷")
+    }
+    
+    private func addOperator(text: String) {
         if canAddOperator(elements: elements) {
-            textView += " ÷ "
+            textView += " \(text) "
         } else {
             delegate?.displayAlert(message: "error: operand already exist")
         }
-        return sendToControler(data: "÷")
+        update(data: "\(text)")
     }
 
-    func displayAlertInController(message: String) {
-        delegate?.displayAlert(message: message)
+    func update(error: String) {
+        delegate?.displayAlert(message: error)
     }
 
     func addStringNumber(number: String) {
@@ -89,35 +78,39 @@ class Calculator {
             textView = ""
         }
         textView += number
-        sendToControler(data: number)
+        update(data: number)
     }
 
     func tappedEqual() {
         guard expressionIsCorrect(elements: elements) else {
-            displayAlertInController(message: "Expression not correct")
+            update(error: "Expression not correct")
             return
         }
         guard expressionHaveEnoughElement(elements: elements) else {
-            displayAlertInController(message: "Not enought elements")
+            update(error: "Not enought elements")
             return
         }
         calculate()
     }
+    
+    func tappedReset() {
+        textView = ""
+        return update(data: textView)
+    }
 
     func calculate() {
         var operationsToReduce = elements
-
         
         while operationsToReduce.count > 1 {
-            var priorities = 0
+            var place = 0
             
             if let index = operationsToReduce.firstIndex(where: { $0 == "x" || $0 == "÷" }) {
                 
-                priorities = index - 1
+                place = index - 1
             }
-            guard let left = Double(operationsToReduce[priorities]) else { return }
-            let operand = operationsToReduce[priorities + 1]
-            guard let right = Double(operationsToReduce[priorities + 2]) else { return }
+            guard let left = Double(operationsToReduce[place]) else { return }
+            let operand = operationsToReduce[place + 1]
+            guard let right = Double(operationsToReduce[place + 2]) else { return }
 
             switch operand {
             case "+": result = left + right
@@ -128,18 +121,13 @@ class Calculator {
             }
 
             for _ in 1...3 {
-                operationsToReduce.remove(at: priorities)
+                operationsToReduce.remove(at: place)
             }
-            operationsToReduce.insert("\(result)", at: priorities)
+            operationsToReduce.insert("\(result)", at: place)
         }
 
         textView += " = \(operationsToReduce.first ?? "Error")"
-        sendToControler(data: textView)
-    }
-
-    func tappedReset() {
-        textView = ""
-        return sendToControler(data: textView)
+        update(data: textView)
     }
   }
 
