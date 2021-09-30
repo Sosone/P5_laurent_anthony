@@ -117,7 +117,8 @@ class Calculator {
             case "-": result = left - right
             case "x": result = left * right
             case "÷": result = left / right
-            default: fatalError("Unknown operator !")
+            default: update(error: "Unknown operator !")
+                tappedReset()
             }
 
             for _ in 1...3 {
