@@ -3,28 +3,26 @@
 //  CountOnMe
 //
 //  Created by Anthony Laurent on 24/09/2021.
-//  Copyright © 2019 Vincent Saluzzo. All rights reserved.
+//  Copyright © 2021 Vincent Saluzzo. All rights reserved.
 //
 
 import UIKit
 
 class ViewController: UIViewController {
 
-    // MARK: Properties
+    // Properties:
     @IBOutlet weak var textView: UITextView!
     @IBOutlet var numberButtons: [UIButton]!
 
-    var calculator = Calculator()
-
-    // MARK: Lifecycle
+    private let calculator = Calculator()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         calculator.delegate = self
     }
 
-    // MARK: Actions
+    // Actions:
     @IBAction func tappedNumberButton(_ sender: UIButton) {
-
         guard let titleButton = sender.title(for: .normal) else { return }
         calculator.addStringNumber(number: titleButton)
     }
@@ -54,7 +52,7 @@ class ViewController: UIViewController {
     }
 }
 
-// MARK: Extensions
+// Extensions:
 extension ViewController: CalculatorDelegate {
     func displayAlert(message: String) {
         let alertVC = UIAlertController(title: "Error!", message: message, preferredStyle: .alert)
