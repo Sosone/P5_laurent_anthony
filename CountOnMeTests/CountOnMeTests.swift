@@ -54,7 +54,7 @@ class CountOnMeTests: XCTestCase {
         XCTAssert(calculator.result == 3)
     }
     
-    func testGivenWhenTappedResetThenOperationDisappears() {
+    func testGivenIWantToEraseTextWhenTappedResetThenOperationDisappears() {
         calculator.tappedReset()
         XCTAssert(calculator.textView == "")
         
@@ -105,6 +105,25 @@ class CountOnMeTests: XCTestCase {
         calculator.update(error: "test erreur")
         XCTAssertTrue(delegate.errorCalled)
         }
+    
+    func testGivenResetTextViewWhenTappedEqualThenShowNumber() {
+        calculator.addStringNumber(number: "2")
+        calculator.tappedAddition()
+        calculator.addStringNumber(number: "2")
+        calculator.calculate()
+        calculator.addStringNumber(number: "3")
+        XCTAssert(calculator.textView == "3")
+    }
+    
+    func testGivenCaseDefaultWhenOperandIsFalseThenMessageAppear() {
+        calculator.textView = (" 2  z  3 ")
+        calculator.tappedEqual()
+        let calculator = Calculator()
+        let delegate = FakeCalculatorDelegate()
+        calculator.delegate = delegate
+        calculator.update(error: "test erreur")
+        XCTAssertTrue(calculator.textView == "")
+    }
     
     func testGivenCaculatorWhenErrorThenDelegateCalled() {
         let calculator = Calculator()
